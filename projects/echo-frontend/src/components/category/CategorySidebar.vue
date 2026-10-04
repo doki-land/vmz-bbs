@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import CategoryFilter from "./CategoryFilter.vue";
-import TopicFilter from "@/components/TopicFilter.vue";
+import TopicFilter from "@/components/topic/TopicFilter.vue";
 
 // 模拟数据，后续需要替换为真实的API调用
 const searchQuery = ref('')
