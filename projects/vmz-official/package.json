@@ -6,19 +6,29 @@
     "scripts": {
         "generate": "node --experimental-strip-types ./node_modules/@yydb/iris/bin/iris.mjs generate --config .",
         "typecheck": "tsc --noEmit -p tsconfig.json",
-        "dev": "wrangler dev",
-        "deploy": "wrangler deploy",
+        "check:pages": "vmz check .",
+        "build:pages": "vmz build .",
+        "build:worker": "pnpm generate && tsc --noEmit -p tsconfig.json",
+        "build": "pnpm build:pages && pnpm build:worker",
+        "dev": "pnpm build:pages && wrangler dev",
+        "dev:pages": "vmz dev .",
+        "dev:worker": "pnpm build:pages && wrangler dev",
+        "deploy:pages": "wrangler pages deploy dist/pages --project-name=vmz-official",
+        "deploy:worker": "wrangler deploy",
+        "deploy": "pnpm build && pnpm deploy:worker && pnpm deploy:pages",
         "push:plan": "node --experimental-strip-types ./node_modules/@yydb/iris/bin/iris.mjs push --config . --plan",
         "push": "node --experimental-strip-types ./node_modules/@yydb/iris/bin/iris.mjs push --config .",
         "cf:types": "wrangler types"
     },
     "dependencies": {
         "@vmz/bbs": "workspace:*",
+        "@vmz/core": "0.1.20",
         "@yydb/iris": "workspace:*"
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20250317.0",
         "@types/node": "^22.15.0",
+        "@vmz/vmz": "0.1.20",
         "typescript": "^5.8.3",
         "wrangler": "^4.24.0"
     }

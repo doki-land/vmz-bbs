@@ -2,10 +2,16 @@ name = "vmz-official"
 main = "src/worker.ts"
 compatibility_date = "2024-11-12"
 
+# Local dev + optional combined deploy: VMZ static UI from dist/pages, API in worker.ts
+[assets]
+directory = "./dist/pages"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
 [[d1_databases]]
 binding = "DB"
-database_name = "vmz-official"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_name = "vmz-bbs-db"
+database_id = "c37517c8-985c-45c0-a301-38009d734515"
 
 [vars]
 VMZ_BBS = "official"

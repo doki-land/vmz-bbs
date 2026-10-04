@@ -1,0 +1,108 @@
+<template>
+    <main class="home">
+        <header>
+            <h1>VMZ BBS</h1>
+            <p>VMZ Pages UI · Workers Iris API</p>
+        </header>
+
+        <p v-if="loading">Loading…</p>
+        <p v-if="error" class="error">{{ error }}</p>
+
+        <ul v-if="!loading && !error">
+            <li v-for="category in categories" :key="category.categoryId">
+                <span class="dot" :style="{ background: category.color }" />
+                <strong>{{ category.name }}</strong>
+                <span class="link">/{{ category.link }}</span>
+                <p v-if="category.description">{{ category.description }}</p>
+            </li>
+        </ul>
+    </main>
+</template>
+
+<style>
+.home {
+    font-family: system-ui, sans-serif;
+    margin: 0 auto;
+    max-width: 48rem;
+    padding: 2rem 1.25rem;
+}
+
+header h1 {
+    margin: 0 0 0.25rem;
+}
+
+header p {
+    color: #666;
+    margin: 0 0 1.5rem;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    border: 1px solid #e5e5e5;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.dot {
+    border-radius: 50%;
+    display: inline-block;
+    height: 0.65rem;
+    margin-right: 0.5rem;
+    width: 0.65rem;
+}
+
+.link {
+    color: #888;
+    margin-left: 0.5rem;
+}
+
+.error {
+    color: #b00020;
+}
+</style>
+
+<script client>
+type CategoryRow = {
+    categoryId: string;
+    link: string;
+    name: string;
+    description: string;
+    color: string;
+};
+
+export default class IndexPage {
+    categories: CategoryRow[] = [];
+    loading = true;
+    error = "";
+
+    async onMount() {
+        if (typeof globalThis.window === "undefined") {
+            return;
+        }
+        try {
+            const response = await fetch("/api/categories");
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            this.categories = await response.json();
+        } catch (cause) {
+            this.error = cause instanceof Error ? cause.message : "Failed to load categories";
+        } finally {
+            this.loading = false;
+        }
+    }
+
+    static meta() {
+        return {
+            title: "VMZ BBS",
+            description: "Official VMZ forum on Cloudflare",
+        };
+    }
+}
+</script>
