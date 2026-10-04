@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "strict": true,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "isolatedModules": true,
+        "allowImportingTsExtensions": true,
+        "lib": ["ES2022"],
+        "types": ["@cloudflare/workers-types"],
+        "baseUrl": ".",
+        "paths": {
+            "@yydb/iris/cloudflare": ["../../../iris-orm/projects/packages/iris/src/cloudflare/index.ts"],
+            "@yydb/iris/types": ["../../../iris-orm/projects/packages/iris/src/types/index.ts"],
+            "@iris/*": ["./src/generated/iris/*"]
+        }
+    },
+    "include": ["src/**/*.ts", "iris.config.ts"],
+    "exclude": ["src/generated/iris/node.ts", "src/generated/iris/browser.ts"]
+}

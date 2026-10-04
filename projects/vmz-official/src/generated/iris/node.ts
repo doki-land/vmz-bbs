@@ -1,0 +1,34 @@
+import { createIrisOperationExecutor } from "@yydb/iris/node";
+import type { CreateIrisDbBindingOptions } from "@yydb/iris/types";
+import { createClient, type DbClient } from "./operations.js";
+import { IRIS_SCHEMA_FINGERPRINT } from "./metadata.js";
+let openDatabaseClient: DbClient | null = null;
+/** Node host: construct and reuse generated clients with N-API operation executor. */
+export class Database {
+    /** Construct a new client for this call site (no process singleton). */
+    static async create(options?: CreateIrisDbBindingOptions): Promise<DbClient> {
+        return createClient(
+            await createIrisOperationExecutor({
+                ...options,
+                contractFingerprint: IRIS_SCHEMA_FINGERPRINT,
+            }),
+        );
+    }
+    /** Reuse one client per process. Options apply only on the first call. */
+    static async open(options?: CreateIrisDbBindingOptions): Promise<DbClient> {
+        if (!openDatabaseClient) {
+            openDatabaseClient = await Database.create(
+                options ?? { config: process.cwd(), source: "default" },
+            );
+        }
+        return openDatabaseClient;
+    }
+    static async close(): Promise<void> {
+        if (!openDatabaseClient) {
+            return;
+        }
+        await openDatabaseClient.$close();
+        openDatabaseClient = null;
+    }
+}
+export { createClient, DbClient } from "./operations.js";

@@ -1,0 +1,16 @@
+import { createIrisOperationExecutor } from "@yydb/iris/wasm";
+import type { CreateIrisDbBindingOptions } from "@yydb/iris/types";
+import { createClient, type DbClient } from "./operations.js";
+import { IRIS_SCHEMA_FINGERPRINT } from "./metadata.js";
+/** Browser / Worker host: WASM operation executor (call `initIris()` or `loadIrisWeb()` before `Database.create`). */
+export class Database {
+    static async create(options?: CreateIrisDbBindingOptions): Promise<DbClient> {
+        return createClient(
+            await createIrisOperationExecutor({
+                ...options,
+                contractFingerprint: IRIS_SCHEMA_FINGERPRINT,
+            }),
+        );
+    }
+}
+export { createClient, DbClient } from "./operations.js";
