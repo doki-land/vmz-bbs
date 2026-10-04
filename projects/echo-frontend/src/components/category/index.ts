@@ -1,5 +1,0 @@
-export {default as CategoryCard} from './CategoryCard.vue'
-export {default as CategoryCell} from './CategoryCell.vue'
-export {default as CategoryEditor} from './CategoryEditor.vue'
-export {default as CategoryFilter} from './CategoryFilter.vue'
-export {default as CategorySidebar} from './CategorySidebar.vue'

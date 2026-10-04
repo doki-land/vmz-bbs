@@ -1,15 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["projects/*"]
-default-members = [
-    "projects/echo-backend",
-]
+members = []
 exclude = [
-    "projects/echo-api",
-    "projects/echo-frontend",
     "projects/vmz-bbs",
     "projects/vmz-official",
-    "projects/.DS_Store",
 ]
 
 [profile.release]

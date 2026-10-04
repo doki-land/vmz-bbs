@@ -1,5 +1,4 @@
 packages:
-  - 'projects/echo-frontend'
   - 'projects/vmz-bbs'
   - 'projects/vmz-official'
   - '../iris-orm/projects/packages/iris'
