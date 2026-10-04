@@ -1,30 +1,30 @@
 # VMZ Official BBS (Cloudflare Workers)
 
-Official VMZ BBS deployment using:
+Official VMZ BBS deployment:
 
-- `@vmz/bbs` — domain contracts + D1 list/create API factory
-- `@yydb/iris` — schema generate + `@yydb/iris/cloudflare` read plans on D1
-- Wrangler + D1 migrations for durable storage
+- `@vmz/bbs` — HTTP routes over an Iris-generated `Database` client (no application SQL)
+- `@yydb/iris` — `schemas/bbs.iris` → generate → `@yydb/iris/cloudflare` D1 physical plans
+- Wrangler D1 — durable storage binding (`migrations/` holds DDL bootstrap aligned with Iris schema)
 
 ## Setup
 
 ```powershell
 pnpm install
+pnpm generate:official
 pnpm --filter vmz-official db:migrate:local
-pnpm --filter vmz-official generate
-pnpm --filter vmz-official dev
+pnpm dev:official
 ```
 
 Replace `database_id` in `wrangler.toml` after `wrangler d1 create vmz-official`.
 
-## Routes
+## Routes (all Iris `OperationExecutor`)
 
-| Path | Layer |
-|------|-------|
-| `GET /health` | `@vmz/bbs` |
-| `GET/POST /api/categories` | `@vmz/bbs` D1 SQL |
-| `GET/POST /api/topics` | `@vmz/bbs` D1 SQL |
-| `GET /iris/categories` | Iris generated client + D1 read plans |
-| `GET /iris/topics` | Iris generated client + D1 read plans |
+| Path | Operation |
+|------|-----------|
+| `GET /health` | `category.findMany` probe |
+| `GET /api/categories` | `category.findMany` |
+| `POST /api/categories` | `category.create` |
+| `GET /api/topics` | `topic.findMany` |
+| `POST /api/topics` | `topic.create` |
 
-Writes use `/api/*` until Iris D1 mutation path lands (Phase 4).
+D1 **writes** return Iris diagnostics until mutation physical plans ship in `@yydb/iris/cloudflare`.

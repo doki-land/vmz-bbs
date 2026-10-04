@@ -14,8 +14,7 @@
     },
     "dependencies": {
         "@vmz/bbs": "workspace:*",
-        "@yydb/iris": "workspace:*",
-        "hono": "^4.7.11"
+        "@yydb/iris": "workspace:*"
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20250317.0",
