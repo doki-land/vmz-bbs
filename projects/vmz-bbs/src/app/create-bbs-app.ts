@@ -1,56 +1,87 @@
 import { Hono } from "hono";
 
-import { createCategory, listCategories } from "../d1/category.ts";
-import { createTopic, listTopics } from "../d1/topic.ts";
-import type { BbsBindings, CategoryCreateInput, TopicCreateInput } from "../types.ts";
+import type { CategoryCreateBody, CreateBbsAppOptions, TopicCreateBody } from "../types.ts";
 
-/** Compose the official VMZ BBS HTTP API (D1-backed list/create routes). */
-export function createBbsApp() {
-    const app = new Hono<{ Bindings: BbsBindings }>();
+/**
+ * Compose the VMZ BBS HTTP API backed exclusively by an Iris-generated client.
+ *
+ * No raw SQL — reads and writes route through `OperationExecutor` / D1 physical plans
+ * supplied by the host (`vmz-official` generated `Database.create`).
+ */
+export function createBbsApp<TBindings extends object>(options: CreateBbsAppOptions<TBindings>) {
+    const serviceName = options.serviceName ?? "vmz-bbs";
+    const app = new Hono<{ Bindings: TBindings }>();
 
     app.get("/health", async (c) => {
-        const probe = await c.env.DB.prepare("SELECT 1 AS ok").first<{ ok: number }>();
-        return c.json({
-            ok: true,
-            service: "vmz-official",
-            d1: probe?.ok === 1,
-        });
+        const db = await options.openDatabase(c.env);
+        try {
+            await db.category.findMany();
+            return c.json({ ok: true, service: serviceName, iris: true });
+        } finally {
+            await db.$close();
+        }
     });
 
     app.get("/api/categories", async (c) => {
-        return c.json(await listCategories(c.env.DB));
+        const db = await options.openDatabase(c.env);
+        try {
+            return c.json(await db.category.findMany());
+        } finally {
+            await db.$close();
+        }
     });
 
     app.post("/api/categories", async (c) => {
-        const body = await c.req.json<CategoryCreateInput>();
+        const body = await c.req.json<CategoryCreateBody>();
         if (!body.link?.trim() || !body.name?.trim()) {
             return c.json({ error: "link and name are required" }, 400);
         }
-        const row = await createCategory(c.env.DB, {
-            link: body.link.trim(),
-            name: body.name.trim(),
-            description: body.description?.trim(),
-            color: body.color?.trim(),
-        });
-        return c.json(row, 201);
+        const db = await options.openDatabase(c.env);
+        try {
+            const row = await db.category.create({
+                data: {
+                    categoryId: crypto.randomUUID(),
+                    link: body.link.trim(),
+                    name: body.name.trim(),
+                    description: body.description?.trim() ?? "",
+                    color: body.color?.trim() ?? "#999999",
+                },
+            });
+            return c.json(row, 201);
+        } finally {
+            await db.$close();
+        }
     });
 
     app.get("/api/topics", async (c) => {
-        return c.json(await listTopics(c.env.DB));
+        const db = await options.openDatabase(c.env);
+        try {
+            return c.json(await db.topic.findMany());
+        } finally {
+            await db.$close();
+        }
     });
 
     app.post("/api/topics", async (c) => {
-        const body = await c.req.json<TopicCreateInput>();
+        const body = await c.req.json<TopicCreateBody>();
         if (!body.link?.trim() || !body.name?.trim()) {
             return c.json({ error: "link and name are required" }, 400);
         }
-        const row = await createTopic(c.env.DB, {
-            link: body.link.trim(),
-            name: body.name.trim(),
-            description: body.description?.trim(),
-            color: body.color?.trim(),
-        });
-        return c.json(row, 201);
+        const db = await options.openDatabase(c.env);
+        try {
+            const row = await db.topic.create({
+                data: {
+                    topicId: crypto.randomUUID(),
+                    link: body.link.trim(),
+                    name: body.name.trim(),
+                    description: body.description?.trim() ?? "",
+                    color: body.color?.trim() ?? "#999999",
+                },
+            });
+            return c.json(row, 201);
+        } finally {
+            await db.$close();
+        }
     });
 
     return app;

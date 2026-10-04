@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "description": "VMZ BBS domain contracts, D1 accessors, and Cloudflare Worker app factory",
+    "description": "VMZ BBS domain contracts and Iris-generated-client HTTP app factory",
     "exports": {
         ".": {
             "types": "./src/index.ts",

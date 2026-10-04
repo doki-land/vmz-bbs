@@ -1,50 +1,35 @@
-/** Minimal D1 surface (matches `@yydb/iris/cloudflare` without taking a hard dependency). */
-export interface BbsD1BoundStatement {
-    all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
-    run(): Promise<{ success: boolean }>;
-    first<T = Record<string, unknown>>(): Promise<T | null>;
+/** Minimal Iris-generated client surface consumed by `createBbsApp` (host provides `Database.create`). */
+export interface BbsDbClient {
+    category: {
+        findMany(args?: Record<string, unknown>): Promise<readonly Record<string, unknown>[]>;
+        create(args: { data: Record<string, unknown> }): Promise<Record<string, unknown>>;
+    };
+    topic: {
+        findMany(args?: Record<string, unknown>): Promise<readonly Record<string, unknown>[]>;
+        create(args: { data: Record<string, unknown> }): Promise<Record<string, unknown>>;
+    };
+    $close(): Promise<void>;
 }
 
-export interface BbsD1PreparedStatement extends BbsD1BoundStatement {
-    bind(...values: unknown[]): BbsD1BoundStatement;
-}
+export type OpenBbsDatabase<TBindings extends object> = (bindings: TBindings) => Promise<BbsDbClient>;
 
-export interface BbsD1Database {
-    prepare(query: string): BbsD1PreparedStatement;
-}
-
-export interface BbsBindings {
-    DB: BbsD1Database;
-}
-
-export type CategoryRow = {
-    category_id: string;
-    link: string;
-    name: string;
-    description: string;
-    color: string;
-    created_at: string;
-};
-
-export type TopicRow = {
-    topic_id: string;
-    link: string;
-    name: string;
-    description: string;
-    color: string;
-    created_at: string;
-};
-
-export type CategoryCreateInput = {
+export type CategoryCreateBody = {
     link: string;
     name: string;
     description?: string;
     color?: string;
 };
 
-export type TopicCreateInput = {
+export type TopicCreateBody = {
     link: string;
     name: string;
     description?: string;
     color?: string;
+};
+
+export type CreateBbsAppOptions<TBindings extends object> = {
+    /** Service label in `/health` (default `vmz-bbs`). */
+    serviceName?: string;
+    /** Open the host-generated Iris `Database` client (e.g. `cloudflare.ts`). */
+    openDatabase: OpenBbsDatabase<TBindings>;
 };
