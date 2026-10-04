@@ -1,13 +1,18 @@
 {
     "private": true,
     "workspaces": [
-        "projects/echo-frontend"
+        "projects/echo-frontend",
+        "projects/vmz-bbs",
+        "projects/vmz-official"
     ],
     "scripts": {
         "doc": "cargo doc --no-deps --all-features",
         "test": "cargo test --release",
         "fmt": "cargo fmt --all",
         "dev": "pnpm -F echo-frontend dev --mode localhost",
+        "dev:official": "pnpm -F vmz-official dev",
+        "deploy:official": "pnpm -F vmz-official deploy",
+        "generate:official": "pnpm -F vmz-official generate",
         "p": "git push && git push --tags --prune",
         "reset": "git reset Head~ --soft",
         "u": "cargo upgrade --workspace"

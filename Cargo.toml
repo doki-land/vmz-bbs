@@ -7,6 +7,8 @@ default-members = [
 exclude = [
     "projects/echo-api",
     "projects/echo-frontend",
+    "projects/vmz-bbs",
+    "projects/vmz-official",
     "projects/.DS_Store",
 ]
 

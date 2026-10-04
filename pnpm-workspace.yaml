@@ -1,2 +1,7 @@
 packages:
   - 'projects/echo-frontend'
+  - 'projects/vmz-bbs'
+  - 'projects/vmz-official'
+  - '../iris-orm/projects/packages/iris'
+  - '../iris-orm/projects/packages/iris-unknown-wasm32'
+  - '../iris-orm/projects/packages/iris-win32-x64'
