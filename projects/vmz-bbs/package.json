@@ -1,0 +1,27 @@
+{
+    "name": "@vmz/bbs",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "VMZ BBS domain contracts, D1 accessors, and Cloudflare Worker app factory",
+    "exports": {
+        ".": {
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
+        },
+        "./iris": {
+            "types": "./src/iris/index.ts",
+            "default": "./src/iris/index.ts"
+        }
+    },
+    "scripts": {
+        "typecheck": "tsc --noEmit -p tsconfig.json"
+    },
+    "dependencies": {
+        "hono": "^4.7.11"
+    },
+    "devDependencies": {
+        "@cloudflare/workers-types": "^4.20250317.0",
+        "typescript": "^5.8.3"
+    }
+}
