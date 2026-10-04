@@ -18,7 +18,8 @@ Monorepo for the VMZ forum stack: legacy Echo (Rust + Vue) and the Cloudflare BB
 ```powershell
 pnpm install
 pnpm generate:official
-pnpm --filter vmz-official db:migrate:local
+pnpm --filter vmz-official push:plan
+pnpm --filter vmz-official push
 pnpm dev:official
 ```
 
@@ -29,7 +30,7 @@ All `/api/*` routes use the generated Iris client (`Database.create` → `Operat
 ### Deploy
 
 1. `wrangler d1 create vmz-official` and set `database_id` in `projects/vmz-official/wrangler.toml`
-2. `pnpm --filter vmz-official db:migrate:remote`
+2. Review `push:plan` output, then `pnpm --filter vmz-official push` (human ops — align D1 separately until Iris D1 push ships)
 3. `pnpm deploy:official`
 
 ## Legacy Echo (local)

@@ -13,6 +13,8 @@
         "dev:official": "pnpm -F vmz-official dev",
         "deploy:official": "pnpm -F vmz-official deploy",
         "generate:official": "pnpm -F vmz-official generate",
+        "push:official:plan": "pnpm -F vmz-official push:plan",
+        "push:official": "pnpm -F vmz-official push",
         "p": "git push && git push --tags --prune",
         "reset": "git reset Head~ --soft",
         "u": "cargo upgrade --workspace"

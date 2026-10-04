@@ -14,6 +14,11 @@ node_modules/
 build/
 .wrangler/
 
+# Iris managed_push (local sqlite + plan cache)
+projects/vmz-official/.local/
+projects/vmz-official/.iris/migrations/
+**/.cache/iris/
+
 # Rust
 target/
 static/**/*
