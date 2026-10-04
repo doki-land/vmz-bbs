@@ -13,6 +13,10 @@ Monorepo for the VMZ forum stack: legacy Echo (Rust + Vue) and the Cloudflare BB
 
 `@yydb/iris` is linked from the sibling `iris-orm` repo via `pnpm-workspace.yaml`.
 
+User workflow: **install** (`create-bbs`) → **update** (`update-bbs`). Agent skills: `.agents/skills/`.
+
+The `vmz-bbs` monorepo below is maintainer dev only.
+
 ## Cloudflare official BBS
 
 ```powershell
