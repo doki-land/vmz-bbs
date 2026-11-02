@@ -1,7 +1,7 @@
 import { createIrisOperationExecutor } from "@yydb/iris/node";
 import type { CreateIrisDbBindingOptions } from "@yydb/iris/types";
 import { createClient, type DbClient } from "./operations.js";
-import { IRIS_SCHEMA_FINGERPRINT } from "./metadata.js";
+import { IRIS_FIELD_WIRE_NAMES, IRIS_SCHEMA_FINGERPRINT, IRIS_VALUE_CARRIERS } from "./metadata.js";
 let openDatabaseClient: DbClient | null = null;
 /** Node host: construct and reuse generated clients with N-API operation executor. */
 export class Database {
@@ -10,6 +10,8 @@ export class Database {
         return createClient(
             await createIrisOperationExecutor({
                 ...options,
+                wireNamesByEntity: IRIS_FIELD_WIRE_NAMES,
+                valueCarriersByEntity: IRIS_VALUE_CARRIERS,
                 contractFingerprint: IRIS_SCHEMA_FINGERPRINT,
             }),
         );

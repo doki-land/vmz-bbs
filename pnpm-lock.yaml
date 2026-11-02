@@ -8,21 +8,21 @@ importers:
 
   .: {}
 
-  ../iris-orm/projects/packages/iris:
+  ../iris-orm/projects/iris.ts/packages/iris:
     dependencies:
       '@vmz/commander':
         specifier: ^0.2.0
         version: 0.2.8
-      '@yydb/iris-unknown-wasm32':
+      '@voml/vos':
+        specifier: ^0.0.5
+        version: 0.0.5
+      '@yydb/iris-language':
         specifier: workspace:*
-        version: link:../iris-unknown-wasm32
-      jiti:
-        specifier: ^2.4.2
-        version: 2.7.0
+        version: link:../iris-language
     optionalDependencies:
       '@yydb/iris-win32-x64':
         specifier: workspace:*
-        version: link:../iris-win32-x64
+        version: link:../../platforms/iris-win32-x64
     devDependencies:
       '@types/node':
         specifier: ^22.15.0
@@ -31,7 +31,11 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  ../iris-orm/projects/packages/iris-unknown-wasm32:
+  ../iris-orm/projects/iris.ts/packages/iris-language:
+    dependencies:
+      '@yydb/iris-unknown-wasm32':
+        specifier: workspace:*
+        version: link:../../platforms/iris-unknown-wasm32
     devDependencies:
       '@types/node':
         specifier: ^22.15.0
@@ -40,7 +44,16 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  ../iris-orm/projects/packages/iris-win32-x64: {}
+  ../iris-orm/projects/iris.ts/platforms/iris-unknown-wasm32:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.0
+        version: 22.20.5
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
+  ../iris-orm/projects/iris.ts/platforms/iris-win32-x64: {}
 
   projects/vmz-bbs:
     dependencies:
@@ -61,11 +74,11 @@ importers:
         specifier: workspace:*
         version: link:../vmz-bbs
       '@vmz/core':
-        specifier: 0.1.20
-        version: 0.1.20
+        specifier: 0.3.12
+        version: 0.3.12
       '@yydb/iris':
         specifier: workspace:*
-        version: link:../../../iris-orm/projects/packages/iris
+        version: link:../../../iris-orm/projects/iris.ts/packages/iris
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20250317.0
@@ -74,8 +87,8 @@ importers:
         specifier: ^22.15.0
         version: 22.20.5
       '@vmz/vmz':
-        specifier: 0.1.20
-        version: 0.1.20(typescript@5.9.3)
+        specifier: 0.3.12
+        version: 0.3.12(typescript@5.9.3)
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -469,49 +482,65 @@ packages:
   '@types/node@22.20.5':
     resolution: {integrity: sha512-U2+DNr+wSjpsTS/wZGYHq7GcwfuSmKiKvoPvK22zwTlRhU91yOniN4qRR5KhIjvif7ysw/dz/hKmfDH0Ris4aA==}
 
-  '@vmz/commander@0.1.20':
-    resolution: {integrity: sha512-QPligZbYp13IgEQA3+QckkjJtwuwJDzPlA23sBfKsNGbgVGboEMEBtqwTppRO3vHEIUef13sLnfHTsJwd0aCaA==}
-    engines: {node: '>=20'}
-
   '@vmz/commander@0.2.8':
     resolution: {integrity: sha512-hDTOJGKHam1+GYnOJY8M0yqctrBt8RfdkvUVmkeu1LQVRyfWRZ8kqWnTdYcW8PoCWKP4DdDpcWJrbmI7rn68Bg==}
     engines: {node: '>=20'}
 
-  '@vmz/core@0.1.20':
-    resolution: {integrity: sha512-jlJMOlWMp/tNoVUaVhYkdRp2/DPsZrEtJRlwcgx1vgBfKo3YDjPfwC01uzeLrnmNvBZqbC6uy+iAx3Xxkwn9Jw==}
-
-  '@vmz/diagnostic@0.1.20':
-    resolution: {integrity: sha512-klVF61+X0Az77HzUOK5l5yhSLlTP9BhlCYyDEGulBwwCSv4rsF9wfLbgccM39ry4JpeZRZ5o5JqAKqHkJN0kGg==}
+  '@vmz/commander@0.3.12':
+    resolution: {integrity: sha512-Fs2CJZobP3K8qbpYF7yrHqmsBzG5/FMxAwITiiyJG0Aw4pQOlxW6mFTLwBkzjdwVi8/UIKfqiuntJSiKyPT5XQ==}
     engines: {node: '>=20'}
 
-  '@vmz/plugin@0.1.20':
-    resolution: {integrity: sha512-+/COUN75cSmFFf7oL6+kwDG7sYVeubWlT4rHx2BhTHsFrW38xShvJMVv01ACTVM1BoIJAduXVhVKWPF+krpMsA==}
+  '@vmz/core@0.3.12':
+    resolution: {integrity: sha512-IZp0a721lDCbMEJfufVVelcguDaYfNKuSUgGxGyW4KZ+df8DF6xgVeLuVVo5lYGMilv81J29ubc+c6veiGr7cg==}
 
-  '@vmz/protocol@0.1.20':
-    resolution: {integrity: sha512-Uz74IVCUcpwa9e7Aw9LZDmEL1rxPRn73zVC4ox9pSHlQkOOtD5qzLaiRXzfOXsZR+8v4rlf2gq3+z0/mmJXGfA==}
+  '@vmz/diagnostic@0.3.12':
+    resolution: {integrity: sha512-JlsFTFuSRFH89PtuQUvwuaiiw1Yr+oR+3BwjhZ2lGTDQ6zhMaUryffb7ZDPd+TO9tUIGKpUxekOsuMwgby6Ynw==}
     engines: {node: '>=20'}
 
-  '@vmz/vmz-darwin-arm64@0.1.20':
-    resolution: {integrity: sha512-mQH4n5lLIKxW8LZb4R2dvVGDwacOPsnNJN0Yxpi2late+2TNUDdxIS/FRopKrd1SSy0Lx3niBmL5VrmGRg92+g==}
+  '@vmz/plugin@0.3.12':
+    resolution: {integrity: sha512-crOLXO+2dbpKGZbzHHimiKDipNu6iHY4zFilo4nNACSVbS5vuKLcKc8TL06aBXYPnBbrSFkeIjB5WxnrD6ZBzA==}
+
+  '@vmz/protocol@0.3.12':
+    resolution: {integrity: sha512-oAwBnhVJw9TvCYevwGwKh8Pr+Ruthmyr8qUfq/3XrKRvIKrg2vY6O2+0MExwPypPeX2vhXwW8+WvFYVSNMJSCQ==}
+    engines: {node: '>=20'}
+
+  '@vmz/vmz-darwin-arm64@0.3.12':
+    resolution: {integrity: sha512-BioHMvjPMMcor9VZRUCr9tLm2XyC71dPgLGoVtfwGzkK/GcPkQVcn38R+uBm7hKhiY09OJMYH2sRYspFRw7aiA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@vmz/vmz-linux-x64@0.1.20':
-    resolution: {integrity: sha512-qQmxk+hEMUoJJq5Lhx2/0DZ6ZHFN9AcRXdqYvX9NLoVx6xu1yXXI75WNbIaaRK7zVeDoZKmP8jKk94kWTYzsBQ==}
+  '@vmz/vmz-darwin-x64@0.3.12':
+    resolution: {integrity: sha512-lHuqv963+9BAjwagrENWoJzYqVRZ2NmOjysSZeAwlnn2rNtEo33z9hXbo4ZBZtAh3dPNM+zFFPkcXDTMKp9Pvg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@vmz/vmz-linux-arm64@0.3.12':
+    resolution: {integrity: sha512-4r8isVyV2h1DeT2TdAlHatx66LBKW2wDTvaF7uxtC7k9Q9L/Sj2ObVPdonXcytKTezBb1qNK6s/jh1GS5L8yNA==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@vmz/vmz-linux-x64@0.3.12':
+    resolution: {integrity: sha512-5VbLc0z/0sByHII9uOPS83vVKMT14633KXkN4ZEdO5X5qv8BIxQgSJAX980sjBpiQ+Z5HCzUvWYTXfx4HwsXHA==}
     cpu: [x64]
     os: [linux]
 
-  '@vmz/vmz-win32-x64@0.1.20':
-    resolution: {integrity: sha512-mOBLZWlOn/aCykK7+4t8mqm6B9+EhDMGKKmdri0ou+L3MItxi7D5bQB54wkxfalcx8KSdv0HURvkERiCulydvA==}
+  '@vmz/vmz-win32-arm64@0.3.12':
+    resolution: {integrity: sha512-DlJj1z2He9O1xWvt5okttPxgUlJ0IV4X/08jVvp8P29VXrS0Z1YhvWbPXkdf2/+o6q0b+dsgeFl9ruOxsukg+w==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@vmz/vmz-win32-x64@0.3.12':
+    resolution: {integrity: sha512-6zHVJDmJ+WWrKnY1uYV94ba3HQWniu4dZjqN/H5bwjIoeRNDCaGo982fJTR9rCmReoU/27nZeZG9q6Bgfg82xg==}
     cpu: [x64]
     os: [win32]
 
-  '@vmz/vmz@0.1.20':
-    resolution: {integrity: sha512-AHeTkkgk+DwYmtddGR2L+rbGyMZPqeZUelS2usHKL9KhmcF8l4QyIwisYywrtI8KFBxPy7oHFaVqchaPFbSR3A==}
+  '@vmz/vmz@0.3.12':
+    resolution: {integrity: sha512-b1xsKccZKpLjT1KPOndW/RJATRM0DOwT6nF8n6BD3tivPr3mXtnGPgJ/zKikVwyJgOlZX43lr0GmrtlPleoPmQ==}
+    engines: {node: '>=24.12.0'}
     hasBin: true
     peerDependencies:
-      '@vmz/plugin-markdown-it': 0.1.20
-      '@vmz/test': 0.1.20
+      '@vmz/plugin-markdown-it': 0.3.12
+      '@vmz/test': 0.3.12
       typescript: ^5.8.3
     peerDependenciesMeta:
       '@vmz/plugin-markdown-it':
@@ -520,6 +549,9 @@ packages:
         optional: true
       typescript:
         optional: true
+
+  '@voml/vos@0.0.5':
+    resolution: {integrity: sha512-4gUf1FoGodZ1sWxYJU98K4EXK+N1Qz+plral+09SFiXJ+T4csCuie0sGJN0ZHhf2zPUodvehiMpIHyODBcPRvA==}
 
   blake3-wasm@2.1.5:
     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
@@ -610,10 +642,6 @@ packages:
 
   htmlparser2@10.1.0:
     resolution: {integrity: sha512-VTZkM9GWRAtEpveh7MSF6SjjrpNVNNVJfFup7xTY3UpFtm67foy9HDVXneLtFVt4pMz5kZtgNcvCniNFb1hlEQ==}
-
-  jiti@2.7.0:
-    resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
-    hasBin: true
 
   kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
@@ -963,52 +991,68 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
-  '@vmz/commander@0.1.20': {}
-
   '@vmz/commander@0.2.8': {}
 
-  '@vmz/core@0.1.20':
+  '@vmz/commander@0.3.12': {}
+
+  '@vmz/core@0.3.12':
     dependencies:
       linkedom: 0.18.13
     optionalDependencies:
-      '@vmz/vmz-darwin-arm64': 0.1.20
-      '@vmz/vmz-linux-x64': 0.1.20
-      '@vmz/vmz-win32-x64': 0.1.20
+      '@vmz/vmz-darwin-arm64': 0.3.12
+      '@vmz/vmz-darwin-x64': 0.3.12
+      '@vmz/vmz-linux-arm64': 0.3.12
+      '@vmz/vmz-linux-x64': 0.3.12
+      '@vmz/vmz-win32-arm64': 0.3.12
+      '@vmz/vmz-win32-x64': 0.3.12
     transitivePeerDependencies:
       - canvas
 
-  '@vmz/diagnostic@0.1.20': {}
+  '@vmz/diagnostic@0.3.12': {}
 
-  '@vmz/plugin@0.1.20':
+  '@vmz/plugin@0.3.12':
     dependencies:
-      '@vmz/protocol': 0.1.20
+      '@vmz/protocol': 0.3.12
 
-  '@vmz/protocol@0.1.20': {}
+  '@vmz/protocol@0.3.12': {}
 
-  '@vmz/vmz-darwin-arm64@0.1.20':
+  '@vmz/vmz-darwin-arm64@0.3.12':
     optional: true
 
-  '@vmz/vmz-linux-x64@0.1.20':
+  '@vmz/vmz-darwin-x64@0.3.12':
     optional: true
 
-  '@vmz/vmz-win32-x64@0.1.20':
+  '@vmz/vmz-linux-arm64@0.3.12':
     optional: true
 
-  '@vmz/vmz@0.1.20(typescript@5.9.3)':
+  '@vmz/vmz-linux-x64@0.3.12':
+    optional: true
+
+  '@vmz/vmz-win32-arm64@0.3.12':
+    optional: true
+
+  '@vmz/vmz-win32-x64@0.3.12':
+    optional: true
+
+  '@vmz/vmz@0.3.12(typescript@5.9.3)':
     dependencies:
-      '@vmz/commander': 0.1.20
-      '@vmz/core': 0.1.20
-      '@vmz/diagnostic': 0.1.20
-      '@vmz/plugin': 0.1.20
-      '@vmz/protocol': 0.1.20
-      jiti: 2.7.0
+      '@vmz/commander': 0.3.12
+      '@vmz/core': 0.3.12
+      '@vmz/diagnostic': 0.3.12
+      '@vmz/plugin': 0.3.12
+      '@vmz/protocol': 0.3.12
     optionalDependencies:
-      '@vmz/vmz-darwin-arm64': 0.1.20
-      '@vmz/vmz-linux-x64': 0.1.20
-      '@vmz/vmz-win32-x64': 0.1.20
+      '@vmz/vmz-darwin-arm64': 0.3.12
+      '@vmz/vmz-darwin-x64': 0.3.12
+      '@vmz/vmz-linux-arm64': 0.3.12
+      '@vmz/vmz-linux-x64': 0.3.12
+      '@vmz/vmz-win32-arm64': 0.3.12
+      '@vmz/vmz-win32-x64': 0.3.12
       typescript: 5.9.3
     transitivePeerDependencies:
       - canvas
+
+  '@voml/vos@0.0.5': {}
 
   blake3-wasm@2.1.5: {}
 
@@ -1116,8 +1160,6 @@ snapshots:
       domhandler: 5.0.3
       domutils: 3.2.2
       entities: 7.0.1
-
-  jiti@2.7.0: {}
 
   kleur@4.1.5: {}
 

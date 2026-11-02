@@ -8,7 +8,7 @@
   },
   format: "iris.project",
   generate: {
-    out: "src/generated/iris",
+    out: "generated/iris",
     target: "typescript"
   },
   version: 1

@@ -1,7 +1,29 @@
 /** Runtime VOS synthesis for generated delegates (use-site reference paths, not include/relation). */
-import type { OperationRequest, ResultEnvelope } from "@yydb/iris/types";
+import type { OperationRequest, ResultEnvelope } from "./contract-types.js";
 import type { IrisGeneratedError } from "../errors.js";
-import { IRIS_FIELD_WIRE_NAMES, IRIS_REFERENCE_TARGETS, IRIS_SCHEMA_FINGERPRINT } from "../metadata.js";
+import { IRIS_SCHEMA_FINGERPRINT } from "../metadata.js";
+// Pre-computed per-entity maps inlined at codegen time — synthesize.ts is
+// self-contained for wire-name + reference-target lookup and no longer pulls
+// IRIS_FIELD_WIRE_NAMES / IRIS_REFERENCE_TARGETS from metadata.ts. Those
+// constants remain in metadata.ts for node/browser/cloudflare entry points.
+const SYNTHESIZE_WIRE_NAMES: Record<string, Readonly<Record<string, string>>> = {
+    Category: { categoryId: "category_id", link: "link", name: "name", description: "description", color: "color" },
+    Topic: { topicId: "topic_id", link: "link", name: "name", description: "description", color: "color" },
+};
+const SYNTHESIZE_REF_TARGETS: Record<string, Readonly<Record<string, string>>> = {
+    Category: {  },
+    Topic: {  },
+};
+/**
+ * Field → operator allow-list declared by each field's faithful VOS label at
+ * codegen time. The runtime lowers filters strictly inside this surface, so
+ * an untyped caller cannot widen a `uuid` field to `contains` the way the
+ * old carrier approximation let a plain object pretend to be any filter.
+ */
+const SYNTHESIZE_FILTER_OPS: Record<string, Readonly<Record<string, readonly string[]>>> = {
+    Category: { categoryId: ["eq", "not", "contains", "startsWith", "endsWith"], link: ["eq", "not", "contains", "startsWith", "endsWith"], name: ["eq", "not", "contains", "startsWith", "endsWith"], description: ["eq", "not", "contains", "startsWith", "endsWith"], color: ["eq", "not", "contains", "startsWith", "endsWith"] },
+    Topic: { topicId: ["eq", "not", "contains", "startsWith", "endsWith"], link: ["eq", "not", "contains", "startsWith", "endsWith"], name: ["eq", "not", "contains", "startsWith", "endsWith"], description: ["eq", "not", "contains", "startsWith", "endsWith"], color: ["eq", "not", "contains", "startsWith", "endsWith"] },
+};
 export type VosParameters = Record<string, unknown>;
 export type VosSynthesis = {
     source: string;
@@ -29,18 +51,23 @@ const FILTER_OPS = new Set([
     "isNull",
     "isNotNull",
 ]);
+/** A record literal only: `Uint8Array` / `ArrayBuffer` carriers and class instances must not look like `{ pk }`. */
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null && !Array.isArray(value);
+    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+        return false;
+    }
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
 }
 function isFilterOperatorObject(value: Record<string, unknown>): boolean {
     const keys = Object.keys(value);
     return keys.length > 0 && keys.every((key) => FILTER_OPS.has(key));
 }
 function wireName(entity: string, tsField: string): string {
-    return IRIS_FIELD_WIRE_NAMES[entity]?.[tsField] ?? tsField;
+    return SYNTHESIZE_WIRE_NAMES[entity]?.[tsField] ?? tsField;
 }
 function referenceTargetEntity(entity: string, tsField: string): string | undefined {
-    return IRIS_REFERENCE_TARGETS[entity]?.[tsField];
+    return SYNTHESIZE_REF_TARGETS[entity]?.[tsField];
 }
 function nextParam(parameters: VosParameters, hint: string, value: unknown): string {
     const base = hint.replace(/[^a-zA-Z0-9_]/g, "_");
@@ -60,11 +87,21 @@ function pathExpr(root: string, path: readonly string[]): string {
 function compileLeafPredicate(
     root: string,
     path: readonly string[],
+    entity: string,
+    tsKey: string,
     value: unknown,
     parameters: VosParameters,
 ): string {
     const target = pathExpr(root, path);
     const hint = `p_${path.join("_") || "value"}`;
+    const allowed = SYNTHESIZE_FILTER_OPS[entity]?.[tsKey];
+    if (!allowed) {
+        const error: IrisGeneratedError = {
+            code: "IRIS-FILTER-FIELD-UNKNOWN",
+            message: `filter field \`${entity}.${tsKey}\` declares no filter surface`,
+        };
+        throw error;
+    }
     if (value === true && path.length > 0) {
         return target;
     }
@@ -72,6 +109,15 @@ function compileLeafPredicate(
         return `!${target}`;
     }
     if (isPlainObject(value) && isFilterOperatorObject(value)) {
+        for (const operator of Object.keys(value)) {
+            if (!allowed.includes(operator)) {
+                const error: IrisGeneratedError = {
+                    code: "IRIS-FILTER-OPERATOR-NOT-SUPPORTED",
+                    message: `operator \`${operator}\` is outside the \`${entity}.${tsKey}\` filter surface [${allowed.join(", ")}]`,
+                };
+                throw error;
+            }
+        }
         const clauses: string[] = [];
         if ("eq" in value) {
             const param = nextParam(parameters, hint, value.eq);
@@ -147,7 +193,7 @@ export function compileWherePredicates(
             predicates.push(...compileWherePredicates(nextEntity, value, parameters, root, [...path, wireKey]));
             continue;
         }
-        predicates.push(compileLeafPredicate(root, [...path, wireKey], value, parameters));
+        predicates.push(compileLeafPredicate(root, [...path, wireKey], entity, key, value, parameters));
     }
     return predicates;
 }
@@ -155,6 +201,30 @@ export function compileWherePredicates(
  * Compile nested select into a VOS projection expression rooted at `root`.
  * TypeScript author keys are lowered to VOS wire field names per entity.
  */
+/** Flat scalar wire columns selected with `{ field: true }` (sorted for plan metadata). */
+export function compileSelectWireColumns(entity: string, select: Record<string, unknown>): string[] {
+    const wires: string[] = [];
+    for (const [key, value] of Object.entries(select)) {
+        if (value === true) {
+            wires.push(wireName(entity, key));
+        }
+    }
+    wires.sort();
+    return wires;
+}
+function appendSelectColsParameter(
+    entity: string,
+    select: Record<string, unknown> | undefined,
+    parameters: VosParameters,
+): void {
+    if (!select || Object.keys(select).length === 0) {
+        return;
+    }
+    const wires = compileSelectWireColumns(entity, select);
+    if (wires.length > 0) {
+        parameters.select_cols = wires.join(",");
+    }
+}
 export function compileSelectProjection(
     entity: string,
     select: Record<string, unknown>,
@@ -233,6 +303,54 @@ export type CreateArgs = {
     data: Record<string, unknown>;
     select?: Record<string, unknown>;
 };
+export type DeleteArgs = {
+    where: Record<string, unknown>;
+};
+export type UpdateArgs = {
+    where: Record<string, unknown>;
+    data: Record<string, unknown>;
+    select?: Record<string, unknown>;
+};
+function compilePatchAssignments(
+    entity: string,
+    data: Record<string, unknown>,
+    parameters: VosParameters,
+): string[] {
+    const assignments: string[] = [];
+    for (const [key, value] of Object.entries(data)) {
+        if (value === undefined) {
+            continue;
+        }
+        const wireKey = wireName(entity, key);
+        if (isPlainObject(value) && "set" in value) {
+            const param = nextParam(parameters, `patch_${wireKey}`, flattenRefInput(value.set));
+            assignments.push(`${wireKey}: $${param}`);
+        } else if (isPlainObject(value) && "setNull" in value && value.setNull === true) {
+            assignments.push(`${wireKey}: null`);
+        }
+    }
+    return assignments;
+}
+/** Synthesize `Entity.filter(...).patch({ ... })` with bound where and patch parameters. */
+export function synthesizeUpdate(entity: string, args: UpdateArgs): VosSynthesis {
+    const parameters: VosParameters = {};
+    const predicates = compileWherePredicates(entity, args.where, parameters);
+    const assignments = compilePatchAssignments(entity, args.data, parameters);
+    const body = predicates.length === 1 ? predicates[0]! : predicates.join(" && ");
+    let source = `${entity}.filter(x => ${body}).patch({ ${assignments.join(", ")} })`;
+    if (args.select && Object.keys(args.select).length > 0) {
+        appendSelectColsParameter(entity, args.select, parameters);
+        source = `(${source}).map(x => ${compileSelectProjection(entity, args.select, "x")})`;
+    }
+    return { source, parameters };
+}
+/** Synthesize `Entity.filter(...).delete()` with bound where parameters. */
+export function synthesizeDelete(entity: string, args: DeleteArgs): VosSynthesis {
+    const parameters: VosParameters = {};
+    let pipeline = appendFilter(entity, args.where, parameters);
+    pipeline += ".delete()";
+    return { source: pipeline, parameters };
+}
 /** Synthesize `Entity::insert({ field: $p, ... })` with bound parameters (no placeholders). */
 export function synthesizeCreate(entity: string, args: CreateArgs): VosSynthesis {
     const parameters: VosParameters = {};
@@ -247,12 +365,13 @@ export function synthesizeCreate(entity: string, args: CreateArgs): VosSynthesis
     }
     let source = `${entity}::insert({ ${fields.join(", ")} })`;
     if (args.select && Object.keys(args.select).length > 0) {
+        appendSelectColsParameter(entity, args.select, parameters);
         source = `(${source}).map(x => ${compileSelectProjection(entity, args.select, "x")})`;
     }
     return { source, parameters };
 }
-/** Synthesize a schema macro call `name($arg0, $arg1, ...)` with positional binds. */
-export function synthesizeMacroCall(name: string, args: readonly unknown[]): VosSynthesis {
+/** Synthesize a declared operation invocation `name($arg0, $arg1, ...)` with positional binds. */
+export function synthesizeOperationCall(name: string, args: readonly unknown[]): VosSynthesis {
     const parameters: VosParameters = {};
     const placeholders = args.map((value, index) => {
         const param = nextParam(parameters, `arg${index}`, flattenRefInput(value));

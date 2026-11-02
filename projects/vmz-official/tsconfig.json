@@ -12,11 +12,10 @@
         "types": ["@cloudflare/workers-types"],
         "baseUrl": ".",
         "paths": {
-            "@yydb/iris/cloudflare": ["../../../iris-orm/projects/packages/iris/src/cloudflare/index.ts"],
-            "@yydb/iris/types": ["../../../iris-orm/projects/packages/iris/src/types/index.ts"],
-            "@iris/*": ["./src/generated/iris/*"]
+            "@yydb/iris/types": ["../../../iris-orm/projects/iris.ts/packages/iris/src/types/index.ts"],
+            "@iris/*": ["./generated/iris/*"]
         }
     },
-    "include": ["src/**/*.ts", "iris.config.ts"],
-    "exclude": ["src/generated/iris/node.ts", "src/generated/iris/browser.ts"]
+    "include": ["src/**/*.ts", "worker.ts", "generated/**/*.ts", "iris.config.ts"],
+    "exclude": ["generated/iris/node.ts", "generated/iris/browser.ts"]
 }

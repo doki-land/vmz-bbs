@@ -1,5 +1,5 @@
 name = "vmz-official"
-main = "src/worker.ts"
+main = "worker.ts"
 compatibility_date = "2024-11-12"
 
 # Local dev + optional combined deploy: VMZ static UI from dist/pages, API in worker.ts

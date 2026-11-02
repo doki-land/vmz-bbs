@@ -1,4 +1,4 @@
-import type { CategoryId, CategoryReference, TopicId, TopicReference } from "./references.js";
+import type { TopicId, TopicReference, CategoryId, CategoryReference } from "./references.js";
 export interface Category {
     categoryId: CategoryId;
     link: string;

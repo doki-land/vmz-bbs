@@ -1,6 +1,7 @@
 packages:
   - 'projects/vmz-bbs'
   - 'projects/vmz-official'
-  - '../iris-orm/projects/packages/iris'
-  - '../iris-orm/projects/packages/iris-unknown-wasm32'
-  - '../iris-orm/projects/packages/iris-win32-x64'
+  - '../iris-orm/projects/iris.ts/packages/iris'
+  - '../iris-orm/projects/iris.ts/packages/iris-language'
+  - '../iris-orm/projects/iris.ts/platforms/iris-unknown-wasm32'
+  - '../iris-orm/projects/iris.ts/platforms/iris-win32-x64'

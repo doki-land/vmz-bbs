@@ -1,15 +1,17 @@
-import type { OperationExecutor } from "@yydb/iris/types";
+import type { OperationExecutor } from "./_internal/contract-types.js";
 import {
     buildDeclaredOperationRequest,
     synthesizeCreate,
+    synthesizeDelete,
+    synthesizeUpdate,
     synthesizeFindFirst,
     synthesizeFindMany,
     synthesizeFindUnique,
-    synthesizeMacroCall,
+    synthesizeOperationCall,
     throwOperationEnvelopeError,
 } from "./_internal/synthesize.js";
 import type {
-    CategoryFindManyArgs, CategoryFindFirstArgs, CategoryFindUniqueArgs, CategoryCreateArgs, CategoryGetPayload, TopicFindManyArgs, TopicFindFirstArgs, TopicFindUniqueArgs, TopicCreateArgs, TopicGetPayload
+    CategoryFindManyArgs, CategoryFindFirstArgs, CategoryFindUniqueArgs, CategoryCreateArgs, CategoryDeleteArgs, CategoryUpdateArgs, CategoryGetPayload, TopicFindManyArgs, TopicFindFirstArgs, TopicFindUniqueArgs, TopicCreateArgs, TopicDeleteArgs, TopicUpdateArgs, TopicGetPayload
 } from "./inputs.js";
 /** Schema macros (empty for this project). */
 export class GeneratedMacros {
@@ -73,6 +75,27 @@ export class CategoryDelegate {
         }
         return envelope.value[0] as CategoryGetPayload<A>;
     }
+    async update<const A extends CategoryUpdateArgs>(
+        args: A,
+    ): Promise<CategoryGetPayload<A>> {
+        const synthesis = synthesizeUpdate("Category", args);
+        const envelope = await this.executor.execute(
+            buildDeclaredOperationRequest("Category.update", synthesis),
+        );
+        if (!envelope.ok) {
+            throwOperationEnvelopeError(envelope);
+        }
+        return envelope.value[0] as CategoryGetPayload<A>;
+    }
+    async delete(args: CategoryDeleteArgs): Promise<void> {
+        const synthesis = synthesizeDelete("Category", args);
+        const envelope = await this.executor.executeUnit(
+            buildDeclaredOperationRequest("Category.delete", synthesis),
+        );
+        if (!envelope.ok) {
+            throwOperationEnvelopeError(envelope);
+        }
+    }
 }
 export class TopicDelegate {
     private readonly executor: OperationExecutor;
@@ -129,6 +152,27 @@ export class TopicDelegate {
         }
         return envelope.value[0] as TopicGetPayload<A>;
     }
+    async update<const A extends TopicUpdateArgs>(
+        args: A,
+    ): Promise<TopicGetPayload<A>> {
+        const synthesis = synthesizeUpdate("Topic", args);
+        const envelope = await this.executor.execute(
+            buildDeclaredOperationRequest("Topic.update", synthesis),
+        );
+        if (!envelope.ok) {
+            throwOperationEnvelopeError(envelope);
+        }
+        return envelope.value[0] as TopicGetPayload<A>;
+    }
+    async delete(args: TopicDeleteArgs): Promise<void> {
+        const synthesis = synthesizeDelete("Topic", args);
+        const envelope = await this.executor.executeUnit(
+            buildDeclaredOperationRequest("Topic.delete", synthesis),
+        );
+        if (!envelope.ok) {
+            throwOperationEnvelopeError(envelope);
+        }
+    }
 }
 export class DbClient {
     readonly category: CategoryDelegate;
@@ -140,34 +184,6 @@ export class DbClient {
         this.$macros = new GeneratedMacros(executor);
         this.category = new CategoryDelegate(executor);
         this.topic = new TopicDelegate(executor);
-    }
-    /**
-     * Escape hatch for ad-hoc VOS. Prefer generated delegates for typed args and results.
-     * @internal
-     */
-    async $query<T = unknown>(
-        source: string,
-        parameters?: Readonly<Record<string, unknown>>,
-    ): Promise<T> {
-        const envelope = await this.executor.execute(
-            buildDeclaredOperationRequest("$query", { source, parameters: parameters ?? {} }),
-        );
-        if (!envelope.ok) {
-            throwOperationEnvelopeError(envelope);
-        }
-        return envelope.value as T;
-    }
-    /** Direct VOS DDL. Success maps VOS unit to void. */
-    async $execute(
-        source: string,
-        parameters?: Readonly<Record<string, unknown>>,
-    ): Promise<void> {
-        const envelope = await this.executor.executeUnit(
-            buildDeclaredOperationRequest("$execute", { source, parameters: parameters ?? {} }),
-        );
-        if (!envelope.ok) {
-            throwOperationEnvelopeError(envelope);
-        }
     }
     async $close(): Promise<void> {
         await this.executor.close();
